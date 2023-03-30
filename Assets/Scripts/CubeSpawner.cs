@@ -24,11 +24,21 @@ public class CubeSpawner : MonoBehaviour
     /// <summary>
     /// 생성된 큐브를 관리하는 리스트
     /// </summary>
-    private List<GameObject> cubeList = new List<GameObject>();
+    private List<PooledObject> cubeList = new List<PooledObject>();
+    ///private List<GameObject> cubeList = new List<GameObject>();
+
+    /// <summary>
+    /// 사용할 풀
+    /// </summary>
+    private ObjectPool cubePool;
+
+    private readonly string CubeString = "Cube";
     
     // Start is called before the first frame update
     void Start()
     {
+        // 사용할 오브젝트 풀 불러옴
+        cubePool = ObjectPool.GetPool(CubeString);
         StartCoroutine(Timer());
     }
 
@@ -38,18 +48,20 @@ public class CubeSpawner : MonoBehaviour
         // 키를 누르면 생성 및 제거
         if (Input.GetKey(KeyCode.Space))
         {
-            var go = Instantiate(CubePrefab, SpawnPos, RandomRot());
+            var go = cubePool.Create(SpawnPos, RandomRot());
+            //var go = Instantiate(CubePrefab, SpawnPos, RandomRot());
             cubeList.Add(go);
         }
         
         if (Input.GetKey(KeyCode.Return))
         {
-            if (cubeList.Any())
+            if (cubeList.Count > 0)
             {
                 var item = cubeList.Last();
-                if (item != null)
+                if (item)
                 {
-                    Destroy(item);
+                    cubePool.Return(item);
+                    //Destroy(item);
                     cubeList.Remove(item);
                 }
             }
@@ -65,7 +77,8 @@ public class CubeSpawner : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(SpawnTime);
-            var go = Instantiate(CubePrefab, SpawnPos, RandomRot());
+            var go = cubePool.Create(SpawnPos, RandomRot());
+            //var go = Instantiate(CubePrefab, SpawnPos, RandomRot());
             cubeList.Add(go);
         }
     }
