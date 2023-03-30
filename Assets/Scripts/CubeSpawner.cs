@@ -32,13 +32,22 @@ public class CubeSpawner : MonoBehaviour
     /// </summary>
     private ObjectPool cubePool;
 
-    private readonly string CubeString = "Cube";
+    /// <summary>
+    /// 사용할 오브젝트 풀 이름
+    /// </summary>
+    private readonly string PoolName = "Cube";
+    
+    /// <summary>
+    /// 코루틴 시간 캐싱
+    /// </summary>
+    private WaitForSeconds waitFor;
     
     // Start is called before the first frame update
     void Start()
     {
         // 사용할 오브젝트 풀 불러옴
-        cubePool = ObjectPool.GetPool(CubeString);
+        cubePool = ObjectPool.GetPool(PoolName);
+        waitFor = new WaitForSeconds(SpawnTime);
         StartCoroutine(Timer());
     }
 
@@ -48,7 +57,7 @@ public class CubeSpawner : MonoBehaviour
         // 키를 누르면 생성 및 제거
         if (Input.GetKey(KeyCode.Space))
         {
-            var go = cubePool.Create(SpawnPos, RandomRot());
+            var go = cubePool.Create(SpawnPos, Random.rotation);
             //var go = Instantiate(CubePrefab, SpawnPos, RandomRot());
             cubeList.Add(go);
         }
@@ -76,8 +85,8 @@ public class CubeSpawner : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(SpawnTime);
-            var go = cubePool.Create(SpawnPos, RandomRot());
+            yield return waitFor;
+            var go = cubePool.Create(SpawnPos, Random.rotation);
             //var go = Instantiate(CubePrefab, SpawnPos, RandomRot());
             cubeList.Add(go);
         }
